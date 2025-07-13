@@ -30,7 +30,6 @@ public record SetJeiSearchPacket(String mod_name) implements CustomPacketPayload
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null) return;
             Internal.getJeiRuntime().getIngredientFilter().setFilterText("@" + packet.mod_name);
-            mc.player.getInventory().startOpen(mc.player);
         });
     }
 

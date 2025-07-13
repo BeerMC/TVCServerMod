@@ -35,8 +35,13 @@ public class JEIMixin {
 
     @Unique
     private static final String[] SUPPORTED_MATERIALS = {
-            "yuushya", "mcwfurnitures", "mcwfoors",
-            "mcwfences", "mcwwindows", "xkdeco", "elegant_countryside"
+            "yuushya",
+            "xkdeco",
+            "elegant_countryside",
+            "mcwfurnitures",
+            "mcwdoors",
+            "mcwfences",
+            "mcwwindows",
     };
 
     @Inject(
