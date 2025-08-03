@@ -4,8 +4,9 @@
   "package": "com.matata.server.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ServerPlayerMixin",
-    "JEIMixin"
+    "EntityMixin",
+    "JEIMixin",
+    "ServerPlayerMixin"
   ],
   "client": [
   ],

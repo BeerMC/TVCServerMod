@@ -17,7 +17,6 @@ public class JeimodCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("jeimod")
-                .requires(source -> source.hasPermission(2))
                 .then(argument("mod_name", StringArgumentType.string())
                 .executes(context -> {
                     ServerPlayer player = context.getSource().getPlayer();

@@ -123,7 +123,6 @@ public class JEIMixin {
             if (entityitem != null) {
                 entityitem.makeFakeItem();
             }
-
             entityplayermp.level().playSound(null, entityplayermp.getX(), entityplayermp.getY(), entityplayermp.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, ((entityplayermp.getRandom().nextFloat() - entityplayermp.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F);
             entityplayermp.inventoryMenu.broadcastChanges();
         } else {
@@ -134,7 +133,7 @@ public class JEIMixin {
             }
         }
 
-        tvc$notifyGive(entityplayermp, itemStackCopy);
+        //tvc$notifyGive(entityplayermp, itemStackCopy);
     }
 
 

@@ -5,14 +5,17 @@ import net.minecraft.server.level.ChunkResult;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Util {
 
@@ -48,6 +51,10 @@ public class Util {
             targetLevel.getChunkSource().removeRegionTicket(TicketType.PLAYER, targetChunkPos, PRELOAD_RADIUS, targetChunkPos);
             return null;
         });
+    }
+
+    public static boolean canSkip(@NotNull Entity one, @NotNull Entity another) {
+        return one.getType().equals(another.getType());
     }
 
 }
