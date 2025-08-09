@@ -53,7 +53,7 @@ public class AsynctpCommand {
                     if (targetLevel == null) {
                         source.sendFailure(Component.literal("目标世界不存在!"));
                     } else {
-                        Util.asynctp(targetPlayer, targetLevel, x, y, z);
+                        Util.asyncTeleportAvoidCallEvent(targetPlayer, targetLevel, x, y, z);
                     }
                 });
             } catch (Exception e) {

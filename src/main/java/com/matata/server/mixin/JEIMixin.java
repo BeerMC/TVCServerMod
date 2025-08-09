@@ -115,7 +115,7 @@ public class JEIMixin {
 
     @Unique
     private static void tvc$giveToInventory(Player entityplayermp, ItemStack itemStack) {
-        ItemStack itemStackCopy = itemStack.copy();
+        //ItemStack itemStackCopy = itemStack.copy();
         boolean flag = entityplayermp.getInventory().add(itemStack);
         if (flag && itemStack.isEmpty()) {
             itemStack.setCount(1);

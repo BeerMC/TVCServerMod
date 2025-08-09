@@ -7,7 +7,8 @@
     "JEIMixin",
     "MinecraftEntityMixin",
     "MinecraftServerGamePacketListenerImplMixin",
-    "MinecraftServerPlayerMixin"
+    "MinecraftServerPlayerMixin",
+    "WaystoneMixin"
   ],
   "client": [
   ],

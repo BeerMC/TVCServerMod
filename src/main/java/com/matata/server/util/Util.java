@@ -22,20 +22,21 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.event.EventHooks;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class Util {
 
     private static final int PRELOAD_RADIUS = 3;
 
-    public static void asynctp(ServerPlayer targetPlayer, ServerLevel targetLevel, double x, double y, double z) {
+    public static void asyncTeleportAvoidCallEvent(ServerPlayer targetPlayer, ServerLevel targetLevel, double x, double y, double z) {
+        asyncTeleportAvoidCallEvent(targetPlayer, targetLevel, x, y, z, targetPlayer.getYRot(), targetPlayer.getXRot());
+    }
+
+    public static void asyncTeleportAvoidCallEvent(ServerPlayer targetPlayer, ServerLevel targetLevel, double x, double y, double z, float yaw, float pitch) {
         ChunkPos targetChunkPos = new ChunkPos(BlockPos.containing(x, y, z));
         List<CompletableFuture<ChunkResult<ChunkAccess>>> chunkLoadFutures = new ArrayList<>();
-        //targetLevel.getChunkSource().addRegionTicket(TicketType.PLAYER, targetChunkPos, PRELOAD_RADIUS, targetChunkPos);
+        targetLevel.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, targetChunkPos, 1, targetPlayer.getId());
         for(int dx = -PRELOAD_RADIUS; dx <= PRELOAD_RADIUS; ++dx) {
             for(int dz = -PRELOAD_RADIUS; dz <= PRELOAD_RADIUS; ++dz) {
                 CompletableFuture<ChunkResult<ChunkAccess>> future = targetLevel.getChunkSource().getChunkFuture(targetChunkPos.x + dx, targetChunkPos.z + dz, ChunkStatus.FULL, true);
@@ -44,27 +45,21 @@ public class Util {
         }
         CompletableFuture.allOf(chunkLoadFutures.toArray(new CompletableFuture[0])).thenRunAsync(() -> {
             if (targetPlayer.isAlive()) {
-                teleportToAvoidCallEvent(targetPlayer, targetLevel, x, y, z, targetPlayer.getYRot(), targetPlayer.getXRot());
-                targetLevel.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, targetChunkPos, 1, targetPlayer.getId());
+                teleportToAvoidCallEvent(targetPlayer, targetLevel, x, y, z, yaw, pitch);
             }
-            //targetLevel.getChunkSource().removeRegionTicket(TicketType.PLAYER, targetChunkPos, PRELOAD_RADIUS, targetChunkPos);
-        }, targetPlayer.getServer()).exceptionally((throwable) -> {
-            //targetLevel.getChunkSource().removeRegionTicket(TicketType.PLAYER, targetChunkPos, PRELOAD_RADIUS, targetChunkPos);
-            return null;
-        });
+        }, targetPlayer.getServer()).exceptionally(throwable -> null);
     }
 
-
-    public static void teleportToAvoidCallEvent(ServerPlayer player, ServerLevel newLevel, double x, double y, double z, float yaw, float pitch) {
+    public static void teleportToAvoidCallEvent(ServerPlayer player, ServerLevel level, double x, double y, double z, float yaw, float pitch) {
         if (player.isSleeping()) {
             player.stopSleepInBed(true, true);
         }
         player.setCamera(player);
         player.stopRiding();
-        if (newLevel == player.level()) {
+        if (level == player.level()) {
             Util.teleportAvoidCallEvent(player, x, y, z, yaw, pitch, Collections.emptySet());
         } else {
-            Util.changeDimensionAvoidCallEvent(player, new DimensionTransition(newLevel, new Vec3(x, y, z), Vec3.ZERO, yaw, pitch, DimensionTransition.DO_NOTHING));
+            Util.changeDimensionAvoidCallEvent(player, new DimensionTransition(level, new Vec3(x, y, z), Vec3.ZERO, yaw, pitch, DimensionTransition.DO_NOTHING));
         }
     }
 
@@ -85,11 +80,11 @@ public class Util {
         player.connection.send(new ClientboundPlayerPositionPacket(x - d0, y - d1, z - d2, yaw - f, pitch - f1, relativeSet, accessor.tvc$getAwaitingTeleport()));
     }
 
-    private static Entity changeDimensionAvoidCallEvent(ServerPlayer player, DimensionTransition transition) {
+    private static void changeDimensionAvoidCallEvent(ServerPlayer player, DimensionTransition transition) {
         if (!CommonHooks.onTravelToDimension(player, transition.newLevel().dimension())) {
-            return null;
+
         } else if (player.isRemoved()) {
-            return null;
+
         } else {
             if (transition.missingRespawnBlock()) {
                 player.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
@@ -101,7 +96,6 @@ public class Util {
                 Util.teleportAvoidCallEvent(player, transition.pos().x, transition.pos().y, transition.pos().z, transition.yRot(), transition.xRot(), Collections.emptySet());
                 player.connection.resetPosition();
                 transition.postDimensionTransition().onTransition(player);
-                return player;
             } else {
                 ServerPlayerAccessor accessor = (ServerPlayerAccessor)player;
                 accessor.tvc$setIsChangingDimension(true);
@@ -134,7 +128,6 @@ public class Util {
                 accessor.tvc$setLastSentHealth(-1.0F);
                 accessor.tvc$setLastSentFood(-1);
                 EventHooks.firePlayerChangedDimensionEvent(player, resourcekey, transition.newLevel().dimension());
-                return player;
             }
         }
     }
