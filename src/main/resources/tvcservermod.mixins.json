@@ -4,11 +4,12 @@
   "package": "com.matata.server.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "BalmMixin",
     "JEIMixin",
+    "WaystoneMixin",
     "MinecraftEntityMixin",
     "MinecraftServerGamePacketListenerImplMixin",
-    "MinecraftServerPlayerMixin",
-    "WaystoneMixin"
+    "MinecraftServerPlayerMixin"
   ],
   "client": [
   ],
