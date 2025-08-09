@@ -1,4 +1,4 @@
-package com.matata.server.commands;
+package com.matata.server.command;
 
 import com.matata.network.SetJeiSearchPacket;
 import com.mojang.brigadier.Command;

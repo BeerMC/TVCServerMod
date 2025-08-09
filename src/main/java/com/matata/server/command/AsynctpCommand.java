@@ -1,6 +1,6 @@
-package com.matata.server.commands;
+package com.matata.server.command;
 
-import com.matata.server.utils.Util;
+import com.matata.server.util.Util;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -57,7 +57,6 @@ public class AsynctpCommand {
                     }
                 });
             } catch (Exception e) {
-                source.sendFailure(Component.literal("传送过程中发生错误: " + e.getMessage()));
                 e.printStackTrace();
             }
         }, targetPlayer.getServer());

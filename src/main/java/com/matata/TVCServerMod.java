@@ -2,7 +2,7 @@ package com.matata;
 
 import com.matata.events.PermanentEventSubscriptions;
 import com.matata.network.SetJeiSearchPacket;
-import com.matata.server.commands.*;
+import com.matata.server.command.*;
 
 import org.slf4j.Logger;
 
