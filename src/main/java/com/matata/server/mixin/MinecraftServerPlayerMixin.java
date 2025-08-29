@@ -54,7 +54,4 @@ public abstract class MinecraftServerPlayerMixin implements ServerPlayerAccessor
         this.lastSentFood = tmp;
     }
 
-
-
-
 }

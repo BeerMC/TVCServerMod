@@ -1,14 +1,14 @@
 package com.matata.server.mixin;
 
+import com.matata.TVCServerMod;
+
 import mezz.jei.common.config.GiveMode;
 import mezz.jei.common.config.IServerConfig;
 import mezz.jei.common.network.ServerPacketContext;
-import mezz.jei.common.util.RegistryUtil;
 import mezz.jei.common.util.ServerCommandUtil;
-import mezz.jei.common.platform.Services;
 
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,7 +25,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Optional;
+import java.util.HashSet;
+import java.util.Set;
 
 import static net.neoforged.neoforgespi.ILaunchContext.LOGGER;
 
@@ -34,23 +35,40 @@ import static net.neoforged.neoforgespi.ILaunchContext.LOGGER;
 public class JEIMixin {
 
     @Unique
-    private static final String[] SUPPORTED_MATERIALS = {
-            "yuushya",
-            "xkdeco",
-            "elegant_countryside",
-            "mcwfurnitures",
-            "mcwdoors",
-            "mcwfences",
-            "mcwwindows",
-    };
+    private static final HashSet<String> SUPPORTED_MATERIALS = new HashSet<>(
+            Set.of(
+                    "yuushya",
+                    "xkdeco",
+                    "elegant_countryside",
+                    "mcwfurnitures",
+                    "mcwdoors",
+                    "mcwfences",
+                    "mcwwindows",
+                    "ultramarine"
+            )
+    );
+
+    @Unique
+    private static final HashSet<String> BLOCKED_MATERIALS = new HashSet<>(
+            Set.of(
+                    "ultramarine:wooden_mallet",
+                    "ultramarine:blue_and_white_porcelain_sword",
+                    "ultramarine:blue_and_white_porcelain_shovel",
+                    "ultramarine:blue_and_white_porcelain_pickaxe",
+                    "ultramarine:blue_and_white_porcelain_axe",
+                    "ultramarine:blue_and_white_porcelain_upgrade_smithing_template"
+            )
+    );
 
     @Inject(
             method = "hasPermissionForCheatMode",
             at = @At("HEAD"),
             cancellable = true
     )
-    private static void onHasPermissionForCheatMode(Player sender, IServerConfig serverConfig,
-                                                    CallbackInfoReturnable<Boolean> cir) {
+    private static void onHasPermissionForCheatMode(Player sender, IServerConfig serverConfig, CallbackInfoReturnable<Boolean> cir) {
+        if(TVCServerMod.isClient()){
+            return;
+        }
         cir.setReturnValue(true);
         cir.cancel();
     }
@@ -60,9 +78,10 @@ public class JEIMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private static void onGive(ServerPacketContext context,
-                               ItemStack itemStack,
-                               GiveMode giveMode, CallbackInfo cir) {
+    private static void onGive(ServerPacketContext context, ItemStack itemStack, GiveMode giveMode, CallbackInfo cir) {
+        if(TVCServerMod.isClient()){
+            return;
+        }
         ServerPlayer sender = context.player();
         if (itemStack.isEmpty()) {
             if (LOGGER.isDebugEnabled()) {
@@ -151,31 +170,9 @@ public class JEIMixin {
     }
 
     @Unique
-    private static String tvc$getDisplayModId(ItemStack ingredient) {
-        return Services.PLATFORM.getItemStackHelper().getCreatorModId(ingredient)
-                .or(() -> tvc$getNamespace(ingredient))
-                .orElse(null);
-    }
-
-    @Unique
-    private static Optional<String> tvc$getNamespace(ItemStack ingredient) {
-        ResourceLocation key = RegistryUtil
-                .getRegistry(Registries.ITEM)
-                .getKey(ingredient.getItem());
-        return Optional.ofNullable(key)
-                .map(ResourceLocation::getNamespace);
-    }
-
-    @Unique
     private static boolean tvc$isFreeMaterial(ItemStack stack) {
-        String namespace = tvc$getDisplayModId(stack);
-        if(namespace == null) return false;
-        for (String prefix : SUPPORTED_MATERIALS) {
-            if (namespace.equals(prefix)) {
-                return true;
-            }
-        }
-        return false;
+        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        return SUPPORTED_MATERIALS.contains(itemId.getNamespace()) && !BLOCKED_MATERIALS.contains(itemId.toString());
     }
 
 }
